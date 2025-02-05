@@ -207,8 +207,6 @@ SecuriScan adheres to **OWASP Top 10** guidelines to ensure robust security anal
 - 🚧 **Phase 2**: Add CSRF, Directory Enumeration, and AI-based risk scoring  
 - 🚀 **Phase 3**: Advanced penetration testing, full AI integration, and cloud deployment  
 
-For the full roadmap, check **[ROADMAP.md](./docs/roadmap.md)**.
-
 ---
 
 ## **📞 Support & Contact**
