@@ -40,6 +40,7 @@ SecuriScan enables:
 
 ## **📂 Project Structure**
 
+```
 SecuriScan/
 ├── backend/             # Python-based security scanner API
 │   ├── app/
