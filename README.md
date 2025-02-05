@@ -184,16 +184,13 @@ Once you’ve made changes, follow these steps:
    git push origin dev
    ```
 
----
-
-## **📌 Managing the dev Branch**
+**📌 Managing the dev Branch**
 
 The dev branch is the main collaboration branch for all frontend and backend work.
 
 Once the project is complete and fully tested, the dev branch will be merged into main.
 ```
 
----
 
 ## **🔒 Security & Compliance**
 SecuriScan adheres to **OWASP Top 10** guidelines to ensure robust security analysis.  
@@ -204,7 +201,6 @@ SecuriScan adheres to **OWASP Top 10** guidelines to ensure robust security anal
 
 **Note**: This tool is intended for ethical security analysis. Unauthorized scanning of external websites is illegal.
 
----
 
 ## **📅 Roadmap**
 - ✅ **MVP**: Core vulnerability detection (SQLi, XSS)  
