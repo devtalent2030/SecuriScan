@@ -224,10 +224,3 @@ For issues, feature requests, or general inquiries, feel free to:
 ## **📜 License**
 SecuriScan is licensed under the **MIT License**. See **[LICENSE](./LICENSE)** for more details.
 
----
-
-✅ **This README ensures your project is professional, well-documented, and ready for collaboration!** 🚀🔥
-
----
-
-Let me know if you want to add anything or modify sections! 🎯💡
