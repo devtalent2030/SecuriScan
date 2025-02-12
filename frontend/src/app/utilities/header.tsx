@@ -1,4 +1,6 @@
 // code based on Flowbite navbar example: https://flowbite.com/docs/components/navbar/ 
+"use client";
+
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { usePathname } from "next/navigation";
 import {useEffect, useState} from "react";
@@ -6,6 +8,7 @@ import {useEffect, useState} from "react";
 export default function Header() {
     const pathname = usePathname();
     const [hidden, setHidden] = useState(true);
+    let hide = true;
 
     function handleHide() {
         setHidden(!hidden)
@@ -17,7 +20,7 @@ export default function Header() {
 
     return (
         <>
-            <nav className="bg-gray-400 dark:bg-gray-900 border-gray-200 ">
+            <nav className="bg-orange-500 dark:bg-orange-900 border-gray-200">
                 <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                     <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
                         <span className="self-center text-2xl font-semibold whitespace-nowrap text-black dark:text-white">Home</span>
@@ -35,12 +38,15 @@ export default function Header() {
                         </svg>
                     </button>
                     <div className={`${hidden == true ? 'hidden' : ''} w-full md:block md:w-auto" id="navbar-default`}>
-                        <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-900 rounded-lg bg-gray-400 dark:bg-gray-900 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-gray-400 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                        <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-900 rounded-lg bg-orange-500 dark:bg-orange-900 
+                        md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-orange-500 dark:bg-orange-800 md:dark:bg-orange-900 
+                        dark:border-orange-700">
                             <li>
-                                <a href="/" className={`${pathname == '/' ? 'active' : 'text-black dark:text-white'} 
+                                <a href="/" className={`${pathname == '/' ? 'text-blue-500 dark:text-blue-400' : 'text-black dark:text-white'} 
                                 block py-2 px-3 rounded hover:bg-gray-100 
                                 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0
-                                md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}
+                                md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white 
+                                md:dark:hover:bg-transparent`}
                                 >
                                     Home
                                 </a>
