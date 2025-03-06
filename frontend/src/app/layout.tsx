@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
 
       <body
-        className={`bg-fixed bg-center bg-cover bg-zinc-300 dark:bg-zinc-800 ${inter.className} antialiased`}
+        className={`bg-fixed bg-center bg-cover bg-gray-400 dark:bg-gray-900 text-black dark:text-white min-h-screen ${inter.className} antialiased`}
       >
         <ThemeProvider
         attribute="class"
@@ -28,7 +28,7 @@ export default function RootLayout({
         enableSystem
         >
           <Header />
-            <main>
+            <main className="container mx-auto p-6">
               {children}
             </main>
           <Footer />

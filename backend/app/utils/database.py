@@ -1,12 +1,15 @@
 import psycopg2
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Database connection settings
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_NAME = os.environ.get("DB_NAME", "securiscan")
-DB_USER = os.environ.get("DB_USER", "securiuser")
-DB_PASS = os.environ.get("DB_PASS", "Kusymiip@171800")
-DB_PORT = os.environ.get("DB_PORT", "5432")
+DB_HOST = os.environ.get("DB_HOST", os.getenv('DB_HOST'))
+DB_NAME = os.environ.get("DB_NAME", os.getenv('DB_NAME'))
+DB_USER = os.environ.get("DB_USER", os.getenv('DB_USER'))
+DB_PASS = os.environ.get("DB_PASS", os.getenv('DB_PASS'))
+DB_PORT = os.environ.get("DB_PORT", os.getenv('DB_PORT'))
 
 def get_connection():
     """Establishes and returns a PostgreSQL database connection."""
