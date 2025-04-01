@@ -1,0 +1,14 @@
+Real-time Demonstration
+
+crawl 
+
+curl -X POST -H "Content-Type: application/json" -d '{"url":"http://books.toscrape.com/"}' http://127.0.0.1:5000/crawl
+
+
+SQL injection check:
+
+curl -X POST -H "Content-Type: application/json" -d '{"url":"http://test.com"}' http://127.0.0.1:5000/check_sql
+
+XSS check:
+
+curl -X POST -H "Content-Type: application/json" -d '{"url":"http://test.com"}' http://127.0.0.1:5000/check_xss

@@ -9,13 +9,14 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: #000000;
   --foreground: #171717;
 }
 
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #000000;
     --foreground: #ededed;
   }
 }
@@ -24,4 +25,64 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bg-gray-800 {
+  background-color: #ffffff !important; /* ✅ White background */
+  color: #000000 !important; /* ✅ Black text */
+  border-bottom: 1px solid #ddd !important; /* ✅ Light border */
+  position: fixed !important; /* ✅ Stays on top */
+  top: 0;
+  left: 50%; 
+  transform: translateX(-50%); /* ✅ Centers the navbar */
+  width: 90%; /* ✅ Adjusts width so it's not full */
+  z-index: 50;
+  border-radius: 8px; /* ✅ Optional: Soft corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ✅ Soft shadow */
+  padding: 10px 20px;
+}
+
+.bg-gray-80 {
+  background-color: #000000 !important; /* ✅ Pure black background */
+  color: #ffffff !important; /* ✅ Pure white text */
+  border-bottom: 12px solid #000000 !important; /* ✅ Twice as thick border */
+  position: fixed !important; /* ✅ Stays on top */
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%); /* ✅ Centers the navbar */
+  width: 73%; /* ✅ Adjusts width so it's not full */
+  z-index: 50;
+  border-radius: 8px; /* ✅ Optional: Soft corners */
+  box-shadow: none; /* ✅ Removes any shadow */
+  padding: 20px 20px; /* ✅ Doubles thickness */
+}
+
+
+@media (min-width: 1024px) {
+  footer {
+    max-width: 74%; /* Adjust width to make it smaller */
+    margin: 0 auto; /* Center it */
+  }
+}
+
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 15s ease infinite;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in;
 }

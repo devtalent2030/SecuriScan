@@ -1,0 +1,54 @@
+/* Scoped animation styles for DashboardPage */
+.dashboard-animation {
+    width: 400px; /* Larger size */
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px; /* Adds spacing */
+}
+
+.container {
+    position: relative;
+    height: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 180px; /* Bigger size */
+    height: 180px;
+    border-radius: 100%;
+    background-color: #fff;
+    border: 9px solid #DEE1E4;
+    overflow: hidden;
+    animation: cloud-loop 0.7s ease infinite alternate;
+}
+
+.box-1, .box-2 {
+    display: flex;
+    justify-content: space-between;
+    animation: rowup-1 1.2s linear infinite normal;
+}
+
+@keyframes rowup-1 {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(50%, 0, 0);
+    }
+}
+
+@keyframes cloud-loop {
+    0% {
+        transform: translate(0, 15px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}

