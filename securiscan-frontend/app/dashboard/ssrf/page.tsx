@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { scanUrl } from "../../api/scan";
 import SsrfReport from "../../../components/SsrfReport";
-import { ChevronDown, ChevronUp, AlertTriangle, X, Minimize2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, X, Minimize2, Copy } from "lucide-react";
+import { jsPDF } from "jspdf";
 
 // Type definitions for SSRF scan result
 interface SsrfVuln {
@@ -63,6 +64,63 @@ export default function SsrfPage() {
     setShowResultsPanel(!showResultsPanel);
   };
 
+  // Function to copy example URL to clipboard
+  const copyExampleUrl = () => {
+    navigator.clipboard.writeText("http://testphp.vulnweb.com/redir.php");
+    alert("URL copied to clipboard!");
+  };
+
+  // Function to download report as PDF
+  const downloadPdf = () => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+    let yPos = 10;
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("SSRF Report", 10, yPos);
+    yPos += 10;
+
+    // Scan Summary
+    doc.setFontSize(12);
+    doc.text("1. Scan Summary", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    doc.text(`Scan ID: SSRF-${new Date().getTime()}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Target URL: ${result.url || "N/A"}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Scan Date: ${new Date().toLocaleString()}`, 15, yPos);
+    yPos += 5;
+    doc.text("Scanner Version: SecuriScan v1.0.0", 15, yPos);
+    yPos += 10;
+
+    // Vulnerabilities
+    doc.setFontSize(12);
+    doc.text("2. Detected SSRF Vulnerabilities", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    if (result.error) {
+      doc.text(result.error, 15, yPos);
+    } else if (result.vulnerabilities && result.vulnerabilities.length > 0) {
+      doc.text(`Found ${result.vulnerabilities.length} potential SSRF vulnerability(s).`, 15, yPos);
+      yPos += 5;
+      result.vulnerabilities.forEach((vuln, idx) => {
+        doc.text(`${idx + 1}. Issue: ${vuln.issue}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Evidence: ${vuln.evidence || "N/A"}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Severity: ${vuln.severity || "Medium"}`, 15, yPos);
+        yPos += 5;
+      });
+    } else {
+      doc.text("No SSRF vulnerabilities detected.", 15, yPos);
+    }
+
+    doc.save(`SSRF-Report-${new Date().getTime()}.pdf`);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 rounded-2xl shadow-2xl animate-gradient text-white">
       {/* Page Header */}
@@ -75,7 +133,16 @@ export default function SsrfPage() {
 
       {/* URL Input */}
       <div className="mb-8">
-        <label className="block text-xl font-semibold mb-2">Target URL:</label>
+        <label className="block text-xl font-semibold mb-2 flex items-center">
+          Target URL:
+          <button
+            onClick={copyExampleUrl}
+            className="ml-2 text-indigo-400 hover:text-indigo-200"
+            title="Copy example URL"
+          >
+            <Copy size={18} />
+          </button>
+        </label>
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
@@ -116,6 +183,15 @@ export default function SsrfPage() {
             >
               {showResultsPanel ? <Minimize2 size={24} /> : <ChevronUp size={24} />}
             </button>
+            {result && (
+              <button
+                onClick={downloadPdf}
+                className="text-purple-400 hover:text-purple-200"
+                title="Download PDF"
+              >
+                Download PDF
+              </button>
+            )}
           </div>
         </div>
 

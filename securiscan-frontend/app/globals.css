@@ -21,6 +21,12 @@
   }
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
+
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
