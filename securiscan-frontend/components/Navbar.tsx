@@ -10,7 +10,6 @@ export default function Navbar() {
         </Link>
         <div className="space-x-6">
           <Link href="/dashboard">Dashboard</Link>
-          <Link href="/reports">Reports</Link>
         </div>
       </div>
     </nav>

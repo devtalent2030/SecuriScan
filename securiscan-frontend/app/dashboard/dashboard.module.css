@@ -23,7 +23,7 @@
     width: 180px; /* Bigger size */
     height: 180px;
     border-radius: 100%;
-    background-color: #fff;
+    background-color: #010101;
     border: 9px solid #DEE1E4;
     overflow: hidden;
     animation: cloud-loop 0.7s ease infinite alternate;

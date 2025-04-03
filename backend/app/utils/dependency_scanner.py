@@ -2,9 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import logging
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-# Extended database of known vulnerabilities (simplified for demo)
+logging.basicConfig(level=logging.DEBUG)
+
 KNOWN_VULNS = {
     "jquery": {
         "3.3.1": "CVE-2019-11358 - XSS vulnerability",
@@ -33,26 +36,22 @@ KNOWN_VULNS = {
 }
 
 def scan_website_js_libraries(url: str, timeout=10):
-    """
-    Scans a website for JavaScript dependencies and checks for known vulnerabilities.
-    
-    Args:
-        url (str): Target URL (e.g., 'https://example.com').
-        timeout (int): Request timeout in seconds.
-    
-    Returns:
-        dict: Structured results with detected libraries and vulnerabilities.
-    """
     results = {
         "action": "scan_dependencies",
         "url": url,
         "dependencies": [],
-        "vulnerabilities": []
+        "vulnerabilities": [],
+        "debug": []
     }
 
+    logging.debug(f"Starting scan for {url}")
     try:
-        response = requests.get(url, timeout=timeout, headers={"User-Agent": "Mozilla/5.0"})
+        response = requests.get(url, timeout=timeout, headers={"User-Agent": "Mozilla/5.0"}, allow_redirects=True, verify=False)
         response.raise_for_status()
+        final_url = response.url
+        results["url"] = final_url
+        results["debug"].append(f"Response status: {response.status_code}, Final URL: {final_url}")
+        results["debug"].append(f"HTML snippet: {response.text[:200]}...")
     except requests.RequestException as e:
         logging.error(f"Failed to fetch {url}: {e}")
         results["vulnerabilities"].append({
@@ -64,9 +63,19 @@ def scan_website_js_libraries(url: str, timeout=10):
 
     soup = BeautifulSoup(response.text, "html.parser")
     script_tags = soup.find_all("script", src=True)
+    results["debug"].append(f"Found {len(script_tags)} script tags with src")
+
+    inline_scripts = soup.find_all("script", src=False)
+    inline_content = " ".join(script.get_text() for script in inline_scripts).lower()
+    results["debug"].append(f"Found {len(inline_scripts)} inline script tags")
+    if inline_scripts:
+        results["debug"].append(f"Inline content sample: {inline_content[:100]}...")
 
     for tag in script_tags:
         src = tag["src"]
+        if not src.startswith(("http://", "https://")):
+            src = urljoin(final_url, src)
+        logging.debug(f"Processing script: {src}")
         library_name, library_version = detect_library(src)
 
         if library_name and library_version:
@@ -77,7 +86,6 @@ def scan_website_js_libraries(url: str, timeout=10):
             }
             results["dependencies"].append(dep_info)
 
-            # Check for known vulnerabilities
             if library_name in KNOWN_VULNS and library_version in KNOWN_VULNS[library_name]:
                 vuln = {
                     "issue": f"Vulnerable {library_name} version detected",
@@ -85,8 +93,9 @@ def scan_website_js_libraries(url: str, timeout=10):
                     "severity": "High"
                 }
                 results["vulnerabilities"].append(vuln)
+                dep_info["status"] = "Known vulnerability detected"
             else:
-                results["dependencies"][-1]["status"] = "No known vulnerabilities in local database"
+                dep_info["status"] = "No known vulnerabilities in local database"
         else:
             results["dependencies"].append({
                 "library": "Unknown",
@@ -95,23 +104,30 @@ def scan_website_js_libraries(url: str, timeout=10):
                 "status": "Unrecognized or unversioned script"
             })
 
-    # If no scripts found
-    if not script_tags:
+    inline_patterns = {
+        "jquery": r"jquery|\$\(|\.ajax",
+        "react": r"react\.|reactdom",
+        "vue": r"vue\.|\bv-bind\b",
+        "bootstrap": r"bootstrap|\.modal",
+        "lodash": r"lodash|_[\.\[]",
+        "angular": r"angular\.|ng-",
+    }
+    for lib, pattern in inline_patterns.items():
+        if re.search(pattern, inline_content):
+            results["dependencies"].append({
+                "library": lib,
+                "version": "unknown (inline)",
+                "source": "Inline script",
+                "status": "Version not detectable; manual review required"
+            })
+            results["debug"].append(f"Detected {lib} usage in inline script via pattern: {pattern}")
+
+    if not script_tags and not any(re.search(pattern, inline_content) for pattern in inline_patterns.values()):
         results["note"] = "No JavaScript dependencies detected on the page."
 
     return results
 
-
 def detect_library(src_url: str):
-    """
-    Detects library name and version from script URL using regex patterns.
-    
-    Args:
-        src_url (str): Script source URL (e.g., 'jquery-3.3.1.min.js').
-    
-    Returns:
-        tuple: (library_name, library_version) or (None, None) if undetected.
-    """
     url_lower = src_url.lower()
     patterns = [
         (r"jquery-(\d+\.\d+\.\d+)", "jquery"),
@@ -120,7 +136,7 @@ def detect_library(src_url: str):
         (r"bootstrap-(\d+\.\d+\.\d+)", "bootstrap"),
         (r"lodash[._-](\d+\.\d+\.\d+)", "lodash"),
         (r"angular-(\d+\.\d+\.\d+)", "angular"),
-        (r"angularjs/(\d+\.\d+\.\d+)", "angular"),  # Alternative Angular pattern
+        (r"angularjs/(\d+\.\d+\.\d+)", "angular"),
     ]
 
     for pattern, lib_name in patterns:
@@ -128,7 +144,6 @@ def detect_library(src_url: str):
         if match:
             return (lib_name, match.group(1))
 
-    # Fallback for unversioned or CDN-hosted scripts
     if "jquery" in url_lower:
         return ("jquery", "unknown")
     if "react" in url_lower:
@@ -143,3 +158,23 @@ def detect_library(src_url: str):
         return ("angular", "unknown")
 
     return (None, None)
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/check_dependencies", methods=["POST"])
+def dependency_scan():
+    data = request.get_json()
+    if not data or "url" not in data:
+        return jsonify({"error": "Missing URL in request"}), 400
+    url = data["url"]
+    try:
+        results = scan_website_js_libraries(url)
+        logging.info(f"Dependency scan completed for {url}")
+        return jsonify(results)
+    except Exception as e:
+        logging.error(f"Error in dependency scan: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5001, debug=True)

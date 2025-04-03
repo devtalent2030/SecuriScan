@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { scanUrl } from "../../api/scan";
 import CryptoFailuresReport from "../../../components/CryptoFailuresReport";
 import { ChevronDown, ChevronUp, AlertTriangle, X, Minimize2 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 // Type definitions
 interface Vulnerability {
@@ -74,6 +75,11 @@ export default function CryptoFailuresPage() {
     setShowResultsPanel(!showResultsPanel);
   };
 
+  const severityData = result?.vulnerabilities?.map(v => ({
+    issue: v.issue.slice(0, 10) + "...",
+    severity: ["Low", "Medium", "High", "Critical"].indexOf(v.severity) + 1
+  })) || [];
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 rounded-2xl shadow-2xl animate-gradient text-white">
       {/* Page Header */}
@@ -91,7 +97,7 @@ export default function CryptoFailuresPage() {
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
-          placeholder="https://testphp.vulnweb.com"
+          placeholder="http://juice-shop.herokuapp.com/rest/user/login"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
@@ -156,6 +162,19 @@ export default function CryptoFailuresPage() {
               ) : (
                 <>
                   <CryptoFailuresReport results={result} />
+                  {showDetails && severityData.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold">Vulnerability Severity</h3>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={severityData}>
+                          <XAxis dataKey="issue" stroke="#fff" />
+                          <YAxis stroke="#fff" />
+                          <Tooltip contentStyle={{ backgroundColor: "#333", border: "none" }} />
+                          <Bar dataKey="severity" fill="#8b5cf6" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </>
               )
             ) : (

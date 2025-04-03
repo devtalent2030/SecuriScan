@@ -20,7 +20,7 @@ export default function AuthFailuresReport({ results }: AuthFailuresReportProps)
 
   return (
     <div className="bg-white p-4 border rounded mt-4 text-black max-w-full">
-      <h2 className="text-xl font-bold mb-2">SecuriScan Authentication Report</h2>
+      <h2 className="text-xl font-bold mb-2">Authentication Report</h2>
 
       {/* 1. Scan Summary */}
       <div className="mb-4">
@@ -29,7 +29,7 @@ export default function AuthFailuresReport({ results }: AuthFailuresReportProps)
           <li><strong>Scan ID:</strong> {scanId}</li>
           <li><strong>Target URL:</strong> {url || "N/A"}</li>
           <li><strong>Scan Date:</strong> {scanDate}</li>
-          <li><strong>Scanner Version:</strong> SecuriScan v1.2.0</li>
+          <li><strong>Scanner Version:</strong> SecuriScan v1.0.0</li>
         </ul>
       </div>
 

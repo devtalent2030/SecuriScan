@@ -1,56 +1,130 @@
-// components/BrokenAccessReport.jsx
 "use client";
 
 import React from "react";
 
 export default function BrokenAccessReport({ results }) {
+  if (!results) return <p className="text-gray-500">No scan results to show.</p>;
+
+  const { url, vulnerable_endpoints = [], time_based_test, detected_paths = [] } = results;
+  const scanId = `SCAN-${new Date().getTime()}`;
+  const scanDate = new Date().toLocaleString();
+  const vulnerableCount = vulnerable_endpoints.length;
+
   return (
-    <div className="bg-gray-800 rounded-lg p-6 text-white space-y-6">
-      <h2 className="text-2xl font-bold mb-2">Broken Access Control Scan Report</h2>
-      <p><strong>Target URL:</strong> {results.url}</p>
+    <div className="bg-white p-4 border rounded mt-4 text-black max-w-full">
+      <h2 className="text-xl font-bold mb-2">Broken Access Control Report</h2>
 
-      {results.vulnerable_endpoints?.length > 0 ? (
-        <>
-          <h3 className="text-lg font-semibold">Detected Issues</h3>
-          <ul className="list-disc pl-6">
-            {results.vulnerable_endpoints.map((vuln, idx) => (
-              <li key={idx} className="mb-2">
-                <strong>Issue:</strong> {vuln.issue} <br />
-                <strong>URL:</strong> <a href={vuln.url} className="text-indigo-300 underline" target="_blank">{vuln.url}</a> <br />
-                <strong>Evidence:</strong> {vuln.evidence} <br />
-                <strong>Status Code:</strong> {vuln.status_code}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p className="text-green-400">No Broken Access vulnerabilities found.</p>
-      )}
+      {/* 1. Scan Summary */}
+      <div className="mb-4">
+        <h3 className="font-semibold">1. Scan Summary</h3>
+        <ul className="ml-4 list-disc">
+          <li><strong>Scan ID:</strong> {scanId}</li>
+          <li><strong>Target URL:</strong> {url}</li>
+          <li><strong>Scan Date:</strong> {scanDate}</li>
+          <li><strong>Scanner Version:</strong> SecuriScan v1.0.0</li>
+        </ul>
+      </div>
 
-      {results.time_based_test && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Time-Based Test</h3>
-          <p className={results.time_based_test.vulnerable ? "text-red-400" : "text-green-400"}>
-            {results.time_based_test.vulnerable ? "Vulnerable" : "Not Vulnerable"} — Delay: {results.time_based_test.delay?.toFixed(2)}s
-            {results.time_based_test.evidence && ` (${results.time_based_test.evidence})`}
-          </p>
-        </div>
-      )}
+      {/* 2. Identified Vulnerabilities */}
+      <div className="mb-4">
+        <h3 className="font-semibold">2. Identified Vulnerabilities</h3>
+        {vulnerableCount > 0 ? (
+          <>
+            <p>
+              Found <strong>{vulnerableCount}</strong> potential broken access control vulnerabilit{y => ies}.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full mt-2 border-collapse text-sm max-w-full">
+                <thead>
+                  <tr className="bg-gray-200 text-black">
+                    <th className="border p-2">Issue</th>
+                    <th className="border p-2">URL</th>
+                    <th className="border p-2">Evidence</th>
+                    <th className="border p-2">Status Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vulnerable_endpoints.map((vuln, idx) => (
+                    <tr key={idx} className="hover:bg-gray-100">
+                      <td className="border p-2">{vuln.issue}</td>
+                      <td className="border p-2">
+                        <a href={vuln.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                          {vuln.url}
+                        </a>
+                      </td>
+                      <td className="border p-2">{vuln.evidence}</td>
+                      <td className="border p-2">{vuln.status_code}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <p className="text-green-600">No broken access control vulnerabilities found.</p>
+        )}
+      </div>
 
-      {results.detected_paths?.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Detected Sensitive Paths</h3>
-          <ul className="list-disc pl-6 text-indigo-300">
-            {results.detected_paths.map((path, idx) => (
+      {/* 3. Detected Sensitive Paths */}
+      <div className="mb-4">
+        <h3 className="font-semibold">3. Detected Sensitive Paths</h3>
+        {detected_paths.length > 0 ? (
+          <ul className="ml-4 list-disc">
+            {detected_paths.map((path, idx) => (
               <li key={idx}>
-                <a href={path} target="_blank" rel="noopener noreferrer" className="underline">
+                <a href={path} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
                   {path}
                 </a>
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-600">No sensitive paths detected.</p>
+        )}
+      </div>
+
+      {/* 4. Time-based Blind Check */}
+      <div className="mb-4">
+        <h3 className="font-semibold">4. Time-based Access Control Check</h3>
+        {time_based_test ? (
+          time_based_test.vulnerable ? (
+            <div className="text-red-600">
+              Potential time-based access control issue detected. Delay: {time_based_test.delay?.toFixed(2)}s
+              {time_based_test.evidence && <><br />Evidence: {time_based_test.evidence}</>}
+            </div>
+          ) : (
+            <p className="text-gray-600">No significant delay detected from time-based access attempts.</p>
+          )
+        ) : (
+          <p className="text-gray-600">No time-based test data available.</p>
+        )}
+      </div>
+
+      {/* 5. Scan Conclusion */}
+      <div className="mb-4">
+        <h3 className="font-semibold">5. Scan Conclusion</h3>
+        {vulnerableCount > 0 || (time_based_test && time_based_test.vulnerable) ? (
+          <p className="text-red-600">
+            This scan identified <strong>{vulnerableCount}</strong> potential vulnerabilities.
+            Immediate remediation is recommended.
+          </p>
+        ) : (
+          <p className="text-green-600">
+            The site appears free of high-level broken access control vulnerabilities tested.
+            Periodic scanning is still recommended.
+          </p>
+        )}
+      </div>
+
+      {/* 6. Footer */}
+      <div className="mb-2">
+        <h3 className="font-semibold">6. Report Generated By</h3>
+        <p className="text-sm">
+          Generated By: SecuriScan Automated Security Scanner <br />
+          Report Format: PDF/HTML/Markdown <br />
+          Contact: securiscan@gmail.com
+        </p>
+      </div>
     </div>
   );
 }

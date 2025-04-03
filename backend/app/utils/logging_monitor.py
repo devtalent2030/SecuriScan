@@ -2,6 +2,8 @@ import requests
 import logging
 import time
 from urllib.parse import urljoin
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -124,3 +126,23 @@ def check_logging_failures(url, timeout=5):
         })
 
     return results
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/check_logging_failures", methods=["POST"])
+def logging_scan():
+    data = request.get_json()
+    if not data or "url" not in data:
+        return jsonify({"error": "Missing URL in request"}), 400
+    url = data["url"]
+    try:
+        results = check_logging_failures(url)
+        logging.info(f"Logging scan completed for {url}")
+        return jsonify(results)
+    except Exception as e:
+        logging.error(f"Error in logging scan: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5001, debug=True)

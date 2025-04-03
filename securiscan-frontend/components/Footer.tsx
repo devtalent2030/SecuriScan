@@ -38,7 +38,7 @@ export default function Footer() {
               <div>
                 <p className="font-bold text-white">Talent Nyota</p>
                 <p className="text-sm text-white">
-                  Backend & Frontend Developer, AI Specialist – Leads backend architecture & AI-driven insights.
+                  Backend & Frontend Developer,  – Leads backend architecture.
                 </p>
               </div>
             </div>

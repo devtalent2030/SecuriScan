@@ -87,7 +87,7 @@ export default function DependencyScannerPage() {
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
-          placeholder="http://testjquery.vulnweb.com"
+          placeholder="https://getbootstrap.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />

@@ -1,12 +1,14 @@
 import requests
 import ssl
 import time
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 import logging
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import socket
 import re
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Weak TLS versions and ciphers
 WEAK_TLS_VERSIONS = ["SSLv2", "SSLv3", "TLSv1", "TLSv1.1"]
@@ -20,7 +22,7 @@ SENSITIVE_PATTERNS = [
     r"password[:=]\s*\S+",  # Plaintext passwords
 ]
 
-def check_crypto_failures(url, timeout=5):
+def check_crypto_failures(url, timeout=15):  # Increased to 15s
     """
     Advanced cryptographic failure scanner checking HTTPS, TLS, ciphers, certificates, and sensitive data exposure.
     
@@ -41,7 +43,6 @@ def check_crypto_failures(url, timeout=5):
     }
 
     parsed = urlparse(url)
-    base_url = f"{parsed.scheme}://{parsed.netloc}"
     hostname = parsed.netloc.split(":")[0]
 
     # Test 1: HTTPS enforcement
@@ -51,15 +52,14 @@ def check_crypto_failures(url, timeout=5):
             "evidence": "URL uses HTTP instead of HTTPS",
             "severity": "High"
         })
-        # Try forcing HTTPS
-        https_url = urljoin("https://", parsed.netloc + parsed.path)
+        https_url = f"https://{parsed.netloc}{parsed.path}"
     else:
         https_url = url
 
     # Test 2: TLS version and cipher suites
     try:
         context = ssl.create_default_context()
-        with socket.create_connection((hostname, 443)) as sock:
+        with socket.create_connection((hostname, 443), timeout=timeout) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                 tls_version = ssock.version()
                 cipher = ssock.cipher()[0]
@@ -82,19 +82,19 @@ def check_crypto_failures(url, timeout=5):
 
     # Test 3: Certificate validation
     try:
-        cert_der = ssl.get_server_certificate((hostname, 443), timeout=timeout).encode()
+        cert_der = ssl.get_server_certificate((hostname, 443)).encode()
         cert = x509.load_pem_x509_certificate(cert_der, default_backend())
         results["certificate_info"] = {
             "issuer": cert.issuer.rfc4514_string(),
             "subject": cert.subject.rfc4514_string(),
             "not_before": cert.not_valid_before.isoformat(),
             "not_after": cert.not_valid_after.isoformat(),
-            "expired": cert.not_valid_after < time.time()
+            "expired": cert.not_valid_after.timestamp() < time.time()
         }
         if results["certificate_info"]["expired"]:
             results["vulnerabilities"].append({
                 "issue": "Expired SSL/TLS certificate",
-                "evidence": f"Expired on {cert.not_valid_after}",
+                "evidence": f"Expired on {cert.not_valid_after.isoformat()}",
                 "severity": "Medium"
             })
     except Exception as e:
@@ -103,7 +103,7 @@ def check_crypto_failures(url, timeout=5):
 
     # Test 4: Sensitive data exposure
     try:
-        r = requests.get(https_url, timeout=timeout)
+        r = requests.get(https_url, timeout=timeout, verify=True)
         for pattern in SENSITIVE_PATTERNS:
             matches = re.findall(pattern, r.text)
             if matches:
@@ -113,7 +113,35 @@ def check_crypto_failures(url, timeout=5):
                     "evidence": f"Found {len(matches)} instances (e.g., {matches[0][:20]}...)",
                     "severity": "Critical"
                 })
+        if not results["exposed_data"]:
+            results["exposed_data"] = []  # Ensure empty list if no matches
     except requests.RequestException as e:
         logging.error(f"Request failed for {https_url}: {e}")
+        results["exposed_data"] = []  # Default to empty list on failure
+        results["vulnerabilities"].append({
+            "issue": "Sensitive data check incomplete",
+            "evidence": f"Request timed out or failed: {str(e)[:50]}...",
+            "severity": "Low"
+        })
 
     return results
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/check_crypto_failures", methods=["POST"])
+def crypto_scan():
+    data = request.get_json()
+    if not data or "url" not in data:
+        return jsonify({"error": "Missing URL in request"}), 400
+    url = data["url"]
+    try:
+        results = check_crypto_failures(url)
+        logging.info(f"Cryptographic Failures scan completed for {url}")
+        return jsonify(results)
+    except Exception as e:
+        logging.error(f"Error in crypto scan: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5001, debug=True)

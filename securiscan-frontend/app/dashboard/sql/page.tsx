@@ -47,7 +47,8 @@ export default function SqlInjectionPage() {
     setShowResultsPanel(true);
 
     try {
-      const data: SQLScanResult = await scanUrl(url, "sql_injection");
+      // CHANGED the second argument from "sql_injection" to "sql"
+      const data: SQLScanResult = await scanUrl(url, "sql");
       setResult(data);
     } catch (error) {
       console.error("SQL injection scan error:", error);
@@ -147,7 +148,10 @@ export default function SqlInjectionPage() {
                   {showDetails && result.time_based_test && (
                     <div className="mt-6 text-gray-300">
                       <h3 className="text-lg font-semibold">Time-Based Blind SQLi Test</h3>
-                      <p><strong>Payload:</strong> <span className="text-yellow-300">{result.time_based_test.payload}</span></p>
+                      <p>
+                        <strong>Payload:</strong>{" "}
+                        <span className="text-yellow-300">{result.time_based_test.payload}</span>
+                      </p>
                       <p>
                         <strong>Status:</strong>{" "}
                         <span className={result.time_based_test.vulnerable ? "text-red-400" : "text-green-400"}>
@@ -155,10 +159,14 @@ export default function SqlInjectionPage() {
                         </span>
                       </p>
                       {result.time_based_test.evidence && (
-                        <p><strong>Evidence:</strong> {result.time_based_test.evidence}</p>
+                        <p>
+                          <strong>Evidence:</strong> {result.time_based_test.evidence}
+                        </p>
                       )}
                       {result.time_based_test.note && (
-                        <p><strong>Note:</strong> {result.time_based_test.note}</p>
+                        <p>
+                          <strong>Note:</strong> {result.time_based_test.note}
+                        </p>
                       )}
                     </div>
                   )}
