@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { scanUrl } from "../../api/scan";
 import CryptoFailuresReport from "../../../components/CryptoFailuresReport";
-import { ChevronDown, ChevronUp, AlertTriangle, X, Minimize2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, X, Minimize2, Copy } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { jsPDF } from "jspdf";
 
 // Type definitions
 interface Vulnerability {
@@ -80,6 +81,65 @@ export default function CryptoFailuresPage() {
     severity: ["Low", "Medium", "High", "Critical"].indexOf(v.severity) + 1
   })) || [];
 
+  // Function to copy example URL to clipboard
+  const copyExampleUrl = () => {
+    navigator.clipboard.writeText("http://juice-shop.herokuapp.com/rest/user/login");
+    alert("URL copied to clipboard!");
+  };
+
+  // Function to download report as PDF
+  const downloadPdf = () => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+    let yPos = 10;
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Cryptographic Failures Report", 10, yPos);
+    yPos += 10;
+
+    // Scan Summary
+    doc.setFontSize(12);
+    doc.text("1. Scan Summary", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    doc.text(`Scan ID: CRYPTO-${new Date().getTime()}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Target URL: ${result.url || "N/A"}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Scan Date: ${new Date().toLocaleString()}`, 15, yPos);
+    yPos += 5;
+    doc.text("Scanner Version: SecuriScan v1.0.0", 15, yPos);
+    yPos += 10;
+
+    // Vulnerabilities
+    doc.setFontSize(12);
+    doc.text("2. Detected Cryptographic Vulnerabilities", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    if (result.error) {
+      doc.text(result.error, 15, yPos);
+    } else if (result.vulnerabilities && result.vulnerabilities.length > 0) {
+      doc.text(`Found ${result.vulnerabilities.length} vulnerability(s).`, 15, yPos);
+      yPos += 5;
+      result.vulnerabilities.forEach((vuln, idx) => {
+        doc.text(`${idx + 1}. Issue: ${vuln.issue}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Severity: ${vuln.severity || "Low"}`, 15, yPos);
+        yPos += 5;
+        if (vuln.evidence) {
+          doc.text(`   Evidence: ${vuln.evidence}`, 15, yPos);
+          yPos += 5;
+        }
+      });
+    } else {
+      doc.text("No cryptographic vulnerabilities detected.", 15, yPos);
+    }
+
+    doc.save(`Crypto-Failures-Report-${new Date().getTime()}.pdf`);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 rounded-2xl shadow-2xl animate-gradient text-white">
       {/* Page Header */}
@@ -93,7 +153,16 @@ export default function CryptoFailuresPage() {
 
       {/* URL Input */}
       <div className="mb-8">
-        <label className="block text-xl font-semibold mb-2">Target URL:</label>
+        <label className="block text-xl font-semibold mb-2 flex items-center">
+          Target URL:
+          <button
+            onClick={copyExampleUrl}
+            className="ml-2 text-indigo-400 hover:text-indigo-200"
+            title="Copy example URL"
+          >
+            <Copy size={18} />
+          </button>
+        </label>
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
@@ -134,6 +203,15 @@ export default function CryptoFailuresPage() {
             >
               {showResultsPanel ? <Minimize2 size={24} /> : <ChevronUp size={24} />}
             </button>
+            {result && (
+              <button
+                onClick={downloadPdf}
+                className="text-purple-400 hover:text-purple-200"
+                title="Download PDF"
+              >
+                Download PDF
+              </button>
+            )}
           </div>
         </div>
 

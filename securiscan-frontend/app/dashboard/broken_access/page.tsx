@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { scanUrl } from "../../api/scan";
 import BrokenAccessReport from "../../../components/BrokenAccessReport.jsx";
-import { ChevronDown, ChevronUp, LockOpen, X, Minimize2 } from "lucide-react";
+import { ChevronDown, ChevronUp, LockOpen, X, Minimize2, Copy } from "lucide-react";
+import { jsPDF } from "jspdf";
 
 // Type definitions
 interface VulnerableEndpoint {
@@ -63,6 +64,65 @@ export default function BrokenAccessPage() {
     setShowResultsPanel(!showResultsPanel);
   };
 
+  // Function to copy example URL to clipboard
+  const copyExampleUrl = () => {
+    navigator.clipboard.writeText("http://juice-shop.herokuapp.com/#/login");
+    alert("URL copied to clipboard!");
+  };
+
+  // Function to download report as PDF
+  const downloadPdf = () => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+    let yPos = 10;
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Broken Access Control Report", 10, yPos);
+    yPos += 10;
+
+    // Scan Summary
+    doc.setFontSize(12);
+    doc.text("1. Scan Summary", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    doc.text(`Scan ID: BAC-${new Date().getTime()}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Target URL: ${result.url || "N/A"}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Scan Date: ${new Date().toLocaleString()}`, 15, yPos);
+    yPos += 5;
+    doc.text("Scanner Version: SecuriScan v1.0.0", 15, yPos);
+    yPos += 10;
+
+    // Vulnerabilities
+    doc.setFontSize(12);
+    doc.text("2. Detected Vulnerable Endpoints", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    if (result.error) {
+      doc.text(result.error, 15, yPos);
+    } else if (result.vulnerable_endpoints && result.vulnerable_endpoints.length > 0) {
+      doc.text(`Found ${result.vulnerable_endpoints.length} vulnerable endpoint(s).`, 15, yPos);
+      yPos += 5;
+      result.vulnerable_endpoints.forEach((endpoint, idx) => {
+        doc.text(`${idx + 1}. Issue: ${endpoint.issue}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   URL: ${endpoint.url}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Status Code: ${endpoint.status_code}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Evidence: ${endpoint.evidence}`, 15, yPos);
+        yPos += 5;
+      });
+    } else {
+      doc.text("No broken access control vulnerabilities detected.", 15, yPos);
+    }
+
+    doc.save(`Broken-Access-Report-${new Date().getTime()}.pdf`);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 rounded-2xl shadow-2xl animate-gradient text-white">
       <h1 className="text-4xl font-extrabold mb-4 tracking-wider flex items-center">
@@ -75,7 +135,16 @@ export default function BrokenAccessPage() {
 
       {/* URL Input */}
       <div className="mb-8">
-        <label className="block text-xl font-semibold mb-2">Target URL:</label>
+        <label className="block text-xl font-semibold mb-2 flex items-center">
+          Target URL:
+          <button
+            onClick={copyExampleUrl}
+            className="ml-2 text-indigo-400 hover:text-indigo-200"
+            title="Copy example URL"
+          >
+            <Copy size={18} />
+          </button>
+        </label>
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
@@ -123,6 +192,15 @@ export default function BrokenAccessPage() {
             >
               {showResultsPanel ? <Minimize2 size={24} /> : <ChevronUp size={24} />}
             </button>
+            {result && (
+              <button
+                onClick={downloadPdf}
+                className="text-purple-400 hover:text-purple-200"
+                title="Download PDF"
+              >
+                Download PDF
+              </button>
+            )}
           </div>
         </div>
 

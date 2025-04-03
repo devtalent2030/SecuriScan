@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { scanUrl } from "../../api/scan";
 import DirectoryEnumReport from "../../../components/DirectoryEnumReport";
-import { ChevronDown, ChevronUp, FolderSearch, X, Minimize2 } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderSearch, X, Minimize2, Copy } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { jsPDF } from "jspdf";
 
 interface DirectoryResult {
   url: string;
@@ -62,6 +63,67 @@ export default function DirectoryEnumPage() {
       dir.status_code === 500 ? 5 : 1
   })) || [];
 
+  // Function to copy example URL to clipboard
+  const copyExampleUrl = () => {
+    navigator.clipboard.writeText("http://testphp.vulnweb.com/");
+    alert("URL copied to clipboard!");
+  };
+
+  // Function to download report as PDF
+  const downloadPdf = () => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+    let yPos = 10;
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Directory Enumeration Report", 10, yPos);
+    yPos += 10;
+
+    // Scan Summary
+    doc.setFontSize(12);
+    doc.text("1. Scan Summary", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    doc.text(`Scan ID: DIR-${new Date().getTime()}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Target URL: ${result.url || "N/A"}`, 15, yPos);
+    yPos += 5;
+    doc.text(`Scan Date: ${new Date().toLocaleString()}`, 15, yPos);
+    yPos += 5;
+    doc.text("Scanner Version: SecuriScan v1.0.0", 15, yPos);
+    yPos += 10;
+
+    // Vulnerabilities
+    doc.setFontSize(12);
+    doc.text("2. Detected Vulnerable Directories", 10, yPos);
+    yPos += 5;
+    doc.setFontSize(10);
+    if (result.error) {
+      doc.text(result.error, 15, yPos);
+    } else if (result.vulnerable_directories && result.vulnerable_directories.length > 0) {
+      doc.text(`Found ${result.vulnerable_directories.length} vulnerable director(y/ies).`, 15, yPos);
+      yPos += 5;
+      result.vulnerable_directories.forEach((dir, idx) => {
+        doc.text(`${idx + 1}. URL: ${dir.url}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Status Code: ${dir.status_code}`, 15, yPos);
+        yPos += 5;
+        doc.text(`   Vulnerable: ${dir.vulnerable ? "Yes" : "No"}`, 15, yPos);
+        yPos += 5;
+        if (dir.evidence) {
+          doc.text(`   Evidence: ${dir.evidence}`, 15, yPos);
+          yPos += 5;
+        }
+      });
+    } else {
+      doc.text("No vulnerable directories detected.", 15, yPos);
+    }
+
+    doc.save(`Directory-Enum-Report-${new Date().getTime()}.pdf`);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 rounded-2xl shadow-2xl animate-gradient text-white">
       <h1 className="text-4xl font-extrabold mb-4 tracking-wider flex items-center">
@@ -73,7 +135,16 @@ export default function DirectoryEnumPage() {
       </p>
 
       <div className="mb-8">
-        <label className="block text-xl font-semibold mb-2">Target URL:</label>
+        <label className="block text-xl font-semibold mb-2 flex items-center">
+          Target URL:
+          <button
+            onClick={copyExampleUrl}
+            className="ml-2 text-indigo-400 hover:text-indigo-200"
+            title="Copy example URL"
+          >
+            <Copy size={18} />
+          </button>
+        </label>
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
@@ -108,6 +179,15 @@ export default function DirectoryEnumPage() {
             <button onClick={() => setShowResultsPanel(!showResultsPanel)} className="text-gray-400 hover:text-gray-200" title={showResultsPanel ? "Minimize" : "Expand"}>
               {showResultsPanel ? <Minimize2 size={24} /> : <ChevronUp size={24} />}
             </button>
+            {result && (
+              <button
+                onClick={downloadPdf}
+                className="text-purple-400 hover:text-purple-200"
+                title="Download PDF"
+              >
+                Download PDF
+              </button>
+            )}
           </div>
         </div>
 
