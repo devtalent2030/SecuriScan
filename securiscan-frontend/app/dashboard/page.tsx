@@ -26,7 +26,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="relative flex-1 p-6 bg-white text-black">
+    <main className="relative flex-1 p-6 bg-purple-900/80 backdrop-blur-md text-black rounded-2xl">
       <div className="bg-white p-8 rounded-lg shadow-xl text-center mb-6 relative overflow-hidden">
         {/* Decorative Shapes */}
         <div className="absolute inset-0 flex justify-around items-center opacity-50">
