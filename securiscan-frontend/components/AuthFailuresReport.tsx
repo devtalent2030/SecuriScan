@@ -1,31 +1,55 @@
 "use client";
 
-import React from "react";
-import { AuthFailuresScanResult } from "../app/dashboard/types"; // Import from the same source as page.tsx
+import React, { useState } from "react";
+import { AuthFailuresScanResult } from "../app/dashboard/types"; // Ensure this path matches your project
 
 interface AuthFailuresReportProps {
   results: AuthFailuresScanResult;
 }
 
 export default function AuthFailuresReport({ results }: AuthFailuresReportProps) {
-  if (!results) {
-    return <p className="text-gray-600">No scan results to display.</p>;
-  }
+  const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark mode
 
-  const { url, vulnerabilities = [], error } = results; // Use vulnerabilities instead of auth_failures
+  if (!results) return <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>No scan results to display.</p>;
 
+  const { url, vulnerabilities = [], error } = results;
   const scanId = `AUTH-${new Date().getTime()}`;
   const scanDate = new Date().toLocaleString();
-  const vulnerableCount = vulnerabilities.filter((v) => v.severity !== "Low").length; // Adjust logic as needed
+  const vulnerableCount = vulnerabilities.filter((v) => v.severity !== "Low").length;
+  const hasVulnerabilities = vulnerableCount > 0 || error;
+
+  const toggleMode = () => setIsDarkMode(!isDarkMode);
 
   return (
-    <div className="bg-white p-4 border rounded mt-4 text-black max-w-full">
-      <h2 className="text-xl font-bold mb-2">Authentication Report</h2>
+    <div
+      className={`p-6 rounded-lg max-w-full shadow-sm ${
+        isDarkMode ? "bg-gray-700 text-white" : "bg-white text-black"
+      }`}
+    >
+      {/* Mode Toggle Button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={toggleMode}
+          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+            isDarkMode
+              ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          }`}
+        >
+          {isDarkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+      </div>
+
+      <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+        Authentication Failures Report
+      </h2>
 
       {/* 1. Scan Summary */}
-      <div className="mb-4">
-        <h3 className="font-semibold">1. Scan Summary</h3>
-        <ul className="ml-4 list-disc">
+      <div className="mb-6">
+        <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+          1. Scan Summary
+        </h3>
+        <ul className={`ml-4 mt-2 list-disc ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
           <li><strong>Scan ID:</strong> {scanId}</li>
           <li><strong>Target URL:</strong> {url || "N/A"}</li>
           <li><strong>Scan Date:</strong> {scanDate}</li>
@@ -34,43 +58,51 @@ export default function AuthFailuresReport({ results }: AuthFailuresReportProps)
       </div>
 
       {/* 2. Identified Authentication Failures */}
-      <div className="mb-4">
-        <h3 className="font-semibold">2. Detected Authentication Issues</h3>
+      <div className="mb-6">
+        <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+          2. Detected Authentication Issues
+        </h3>
         {error ? (
-          <p className="text-red-600">{error}</p>
+          <p className={isDarkMode ? "text-red-400 mt-2" : "text-red-600 mt-2"}>{error}</p>
         ) : vulnerableCount > 0 ? (
-          <p>
+          <p className={isDarkMode ? "text-gray-300 mt-2" : "text-gray-600 mt-2"}>
             Found <strong>{vulnerableCount}</strong> potentially vulnerable issue(s) out of{" "}
             <strong>{vulnerabilities.length}</strong> detected.
           </p>
         ) : (
-          <p className="text-green-600">No authentication vulnerabilities detected.</p>
+          <p className={isDarkMode ? "text-green-400 mt-2" : "text-green-600 mt-2"}>
+            No authentication vulnerabilities detected.
+          </p>
         )}
 
         {vulnerabilities.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full mt-2 border-collapse text-sm max-w-full">
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-gray-200 text-black">
-                  <th className="border p-2">Issue</th>
-                  <th className="border p-2">Severity</th>
-                  <th className="border p-2">Evidence</th>
+                <tr className={isDarkMode ? "bg-gray-600 text-white" : "bg-gray-200 text-black"}>
+                  <th className="border p-3 text-left">Issue</th>
+                  <th className="border p-3 text-left">Severity</th>
+                  <th className="border p-3 text-left">Evidence</th>
                 </tr>
               </thead>
               <tbody>
                 {vulnerabilities.map((vuln, idx) => (
-                  <tr key={idx} className="hover:bg-gray-100">
-                    <td className="border p-2">{vuln.issue}</td>
+                  <tr key={idx} className={isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"}>
+                    <td className="border p-3">{vuln.issue}</td>
                     <td
-                      className={`border p-2 ${
+                      className={`border p-3 ${
                         vuln.severity === "High" || vuln.severity === "Critical"
-                          ? "text-red-600"
+                          ? isDarkMode
+                            ? "text-red-400"
+                            : "text-red-600"
+                          : isDarkMode
+                          ? "text-green-400"
                           : "text-green-600"
                       }`}
                     >
                       {vuln.severity}
                     </td>
-                    <td className="border p-2">{vuln.evidence || "No evidence"}</td>
+                    <td className="border p-3">{vuln.evidence || "No evidence"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -80,29 +112,40 @@ export default function AuthFailuresReport({ results }: AuthFailuresReportProps)
       </div>
 
       {/* 3. Conclusion */}
-      <div className="mb-4">
-        <h3 className="font-semibold">3. Scan Conclusion</h3>
+      <div className="mb-6">
+        <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+          3. Scan Conclusion
+        </h3>
         {error ? (
-          <p className="text-red-600">Scan failed: {error}</p>
-        ) : vulnerableCount > 0 ? (
-          <p className="text-red-600">
+          <p className={isDarkMode ? "text-red-400 mt-2" : "text-red-600 mt-2"}>Scan failed: {error}</p>
+        ) : hasVulnerabilities ? (
+          <p className={isDarkMode ? "text-red-400 mt-2" : "text-red-600 mt-2"}>
             Authentication issues found in <strong>{vulnerableCount}</strong> instance(s).
-            Please apply appropriate access control and hardening techniques.
+            Apply appropriate access control and hardening techniques immediately.
           </p>
         ) : (
-          <p className="text-green-600">
+          <p className={isDarkMode ? "text-green-400 mt-2" : "text-green-600 mt-2"}>
             No exploitable authentication vulnerabilities were detected.
+            Periodic scans are recommended.
           </p>
         )}
       </div>
 
       {/* 4. Footer */}
-      <div className="mb-2">
-        <h3 className="font-semibold">4. Report Generated By</h3>
-        <p className="text-sm">
+      <div className={isDarkMode ? "text-gray-400 text-sm" : "text-gray-500 text-sm"}>
+        <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
+          4. Report Generated By
+        </h3>
+        <p className="mt-2">
           Generated By: SecuriScan Automated Security Scanner <br />
           Report Format: PDF/HTML/Markdown <br />
-          Contact: security@example.com
+          Contact:{" "}
+          <a
+            href="mailto:securiscan@gmail.com"
+            className={isDarkMode ? "text-blue-400 hover:underline" : "text-blue-600 hover:underline"}
+          >
+            securiscan@gmail.com
+          </a>
         </p>
       </div>
     </div>
