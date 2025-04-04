@@ -65,7 +65,7 @@ export default function SecurityMisconfigPage() {
 
   // Function to copy example URL to clipboard
   const copyExampleUrl = () => {
-    navigator.clipboard.writeText("http://testasp.vulnweb.com");
+    navigator.clipboard.writeText("https://gail.com/");
     alert("URL copied to clipboard!");
   };
 
@@ -146,7 +146,7 @@ export default function SecurityMisconfigPage() {
         <input
           type="text"
           className="w-full p-4 border border-indigo-500 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:ring-4 focus:ring-indigo-400 transition-all"
-          placeholder="http://testasp.vulnweb.com"
+          placeholder="https://gail.com/"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />

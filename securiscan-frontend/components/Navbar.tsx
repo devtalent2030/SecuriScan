@@ -8,15 +8,23 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <Link href="/">
           <Image
-            src="/images/securiscan.png"
+            src="/images/securiscan1.png"
             alt="SecuriScan Logo"
             width={80}
             height={20}
             className="cursor-pointer"
           />
         </Link>
-        <div className="space-x-6">
-          <Link href="/dashboard">Dashboard</Link>
+        <div className="space-x-6 flex items-center">
+          <Link href="/dashboard">
+            <Image
+              src="/images/Dashboad.png"
+              alt="Dashboard Link"
+              width={80}
+              height={20}
+              className="cursor-pointer"
+            />
+          </Link>
         </div>
       </div>
     </nav>
