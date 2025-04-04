@@ -2,7 +2,7 @@
 export async function scanUrl(url: string, scanType: string) {
   try {
     const endpointMap: Record<string, string> = {
-      sql: "sql",
+      sql: "sql_injection",
       xss: "xss",
       csrf: "csrf",
       directory_enum: "dirs", // ✅ maps to /check_dirs

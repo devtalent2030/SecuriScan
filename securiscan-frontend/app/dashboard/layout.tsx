@@ -1,10 +1,12 @@
+"use client";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen mt-16"> {/* ✅ Added mt-16 for spacing */}
+    <div className="flex min-h-screen mt-16 max-w-6xl mx-auto">
       {/* Sidebar */}
       <aside className="w-64 bg-purple-900 p-4 shadow-md border-r border-purple-800 rounded-l-2xl">
         <h2 className="text-xl font-bold mb-4 text-white text-center">
@@ -76,7 +78,9 @@ export default function DashboardLayout({
           </a>
           <a
             href="/dashboard/auth_failures"
-            className="block bg-purple-800 text-white text-center p-2 rounded-md hover:bg-purple-700 transition mb-2"
+            className=" edelleen
+
+block bg-purple-800 text-white text-center p-2 rounded-md hover:bg-purple-700 transition mb-2"
           >
             Auth Failures
           </a>
