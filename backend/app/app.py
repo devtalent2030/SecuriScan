@@ -104,7 +104,7 @@ def crawl_site():
 ##################################################
 # Endpoint to Trigger SQL Injection Check
 ##################################################
-@app.route('/check_sql', methods=['POST'])
+@app.route('/check_sql_injection', methods=['POST'])
 def check_sql():
     data = request.get_json()
     target_url = data.get('url')
