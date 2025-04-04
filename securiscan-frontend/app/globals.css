@@ -53,9 +53,8 @@ body {
 }
 
 .bg-gray-80 {
-  background-color: #000000 !important; /* ✅ Pure black background */
+  background-color: rgba(0, 0, 0, 0.89) !important; /* ✅ Pure black background */
   color: #ffffff !important; /* ✅ Pure white text */
-  border-bottom: 12px solid #000000 !important; /* ✅ Twice as thick border */
   position: fixed !important; /* ✅ Stays on top */
   top: 10px;
   left: 50%;
@@ -64,7 +63,6 @@ body {
   z-index: 50;
   border-radius: 8px; /* ✅ Optional: Soft corners */
   box-shadow: none; /* ✅ Removes any shadow */
-  padding: 20px 20px; /* ✅ Doubles thickness */
 }
 
 
