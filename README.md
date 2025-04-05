@@ -125,7 +125,7 @@ docker-compose up --build
 ---
 ## 📸 Screenshots
 
-Below are a few sample screenshots from the application. Make sure the image files are placed in your repo (e.g., in `public/images/`) and update the paths accordingly.
+Below are a few sample screenshots from the Website.
 
 ### 🏠 Homepage
 ![SecuriScan Homepage](/securiscan-frontend/public/images/home.png)
