@@ -41,7 +41,6 @@ SecuriScan enables:
 SecuriScan/
 ├── backend/             # Python-based security scanner API
 │   ├── app/
-│   │   ├── models/      # Database models
 │   │   ├── routes/      # API endpoints
 │   │   ├── utils/       # Security analysis scripts
 │   │   ├── app.py       # Main application file
@@ -76,8 +75,7 @@ SecuriScan/
 ## **🚀 Features**
 ✔ **Automated Website Crawling**: Extract URLs and analyze website structure.  
 ✔ **SQL Injection Detection**: Identify SQLi vulnerabilities with AI-driven payloads.  
-✔ **Cross-Site Scripting (XSS) Scanner**: Detect XSS risks in web applications.  
-✔ **AI-Powered Risk Analysis**: Predict high-risk areas using ML models.  
+✔ **Cross-Site Scripting (XSS) Scanner**: Detect XSS risks in web applications.   
 ✔ **Real-Time Reporting**: Interactive dashboards and PDF/JSON/HTML reports.  
 ✔ **Role-Based Access Control**: Secure authentication and access levels.  
 ✔ **Scalability with Docker & Cloud**: Easily deployable on AWS or any cloud provider.
