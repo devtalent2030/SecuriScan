@@ -9,7 +9,6 @@ SecuriScan is for anyone who has a website and wants to keep it safe from hacker
 
 SecuriScan enables:
 - **Automated website crawling** to discover security loopholes.
-- **AI-driven risk analysis** for prioritizing vulnerabilities.
 - **Penetration testing tools** to simulate real-world attacks.
 - **Detailed security reports** with actionable remediation steps.
 - **Scalability & containerized deployment** using **Docker & AWS**.
@@ -19,10 +18,8 @@ SecuriScan enables:
 ## **🛠 Tech Stack**
 ### **Backend** 🖥️
 - **Framework**: Flask (Python)
-- **Database**: PostgreSQL
 - **Web Scraping**: BeautifulSoup, Requests
 - **Security Analysis**: Scapy, Nmap, OWASP Guidelines
-- **AI & Machine Learning**: TensorFlow (for risk prediction)
 - **Logging & Monitoring**: Python Logging, CloudWatch
 
 ### **Frontend** 🎨
