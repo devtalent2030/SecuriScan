@@ -24,6 +24,7 @@ function getSeverityAndMitigation(payload) {
 
 export default function SQLInjectionReport({ results }) {
   const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark mode
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false); // State for technical popup
 
   if (!results) return <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>No scan results to display.</p>;
 
@@ -34,6 +35,7 @@ export default function SQLInjectionReport({ results }) {
   const hasVulnerabilities = vulnerableCount > 0 || (time_based_test && time_based_test.vulnerable);
 
   const toggleMode = () => setIsDarkMode(!isDarkMode);
+  const toggleTechnicalDetails = () => setShowTechnicalDetails(!showTechnicalDetails);
 
   return (
     <div
@@ -58,6 +60,28 @@ export default function SQLInjectionReport({ results }) {
       <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
         SQL Injection Report
       </h2>
+
+      {/* Scanner Description with Info Icon */}
+      <div className="mb-6">
+        <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-200" : "text-gray-700"} flex items-center`}>
+          SQL Injection Scanner
+          <span
+            onClick={toggleTechnicalDetails}
+            className={`ml-2 cursor-pointer text-xl ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}
+            title="Click for technical details"
+          >
+            ℹ️
+          </span>
+        </h3>
+        <p className={isDarkMode ? "text-gray-300 mt-2" : "text-gray-600 mt-2"}>
+          Run this scanner to catch sneaky tricks where someone could mess with your website’s “filing cabinet” (database) by slipping in fake instructions. Just paste a website address with some extra details (like ?id=1) to start checking.
+        </p>
+        {showTechnicalDetails && (
+          <div className={`mt-2 p-3 rounded ${isDarkMode ? "bg-gray-600 text-gray-200" : "bg-gray-100 text-gray-800"}`}>
+            <strong>Technical Details:</strong> Run this scanner to detect SQL Injection flaws—unsanitized inputs that may let attackers manipulate your queries. Paste a URL with parameters to begin the scan.
+          </div>
+        )}
+      </div>
 
       {/* 1. Scan Summary */}
       <div className="mb-6">
