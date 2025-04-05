@@ -121,70 +121,9 @@ docker-compose up --build
 | **GET** | `/scan_history` | Fetches scan history |
 | **GET** | `/ping` | API health check |
 
-For detailed API documentation, refer to:  
-📄 [`docs/api-specifications.md`](./docs/api-specifications.md)
 
 ---
 
-# **👥 Guide Team to Work on the Frontend**
-
-All frontend development should be pushed directly to the `dev` branch. Follow these steps:
-
----
-
-## **📌 Steps to Start Working**
-
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/devtalent2030/SecuriScan.git
-   cd SecuriScan
-   ```
-
-2. **Switch to the dev branch:**
-   ```sh
-   git checkout dev
-   ```
-
-3. **Pull the latest updates:**
-   ```sh
-   git pull origin dev
-   ```
-
-4. **Start working on the frontend!** 🎉
-
----
-
-## **📌 How to Push Updates**
-
-Once you’ve made changes, follow these steps:
-
-1. **Stage all changes:**
-   ```sh
-   git add .
-   ```
-
-2. **Commit with a descriptive message:**
-   ```sh
-   git commit -m "Frontend UI updates: Added navbar component"
-   ```
-
-3. **Push directly to dev:**
-   ```sh
-   git push origin dev
-   ```
-
-🔹 🚨 **Important:** Always pull the latest changes from dev before pushing your own updates to avoid merge conflicts:
-   ```sh
-   git pull origin dev
-   git push origin dev
-   ```
-
-**📌 Managing the dev Branch**
-
-The dev branch is the main collaboration branch for all frontend and backend work.
-
-Once the project is complete and fully tested, the dev branch will be merged into main.
-```
 
 
 ## **🔒 Security & Compliance**
@@ -195,12 +134,6 @@ SecuriScan adheres to **OWASP Top 10** guidelines to ensure robust security anal
 - Continuous vulnerability scanning
 
 **Note**: This tool is intended for ethical security analysis. Unauthorized scanning of external websites is illegal.
-
-
-## **📅 Roadmap**
-- ✅ **MVP**: Core vulnerability detection (SQLi, XSS)  
-- 🚧 **Phase 2**: Add CSRF, Directory Enumeration, and AI-based risk scoring  
-- 🚀 **Phase 3**: Advanced penetration testing, full AI integration, and cloud deployment  
 
 ---
 
