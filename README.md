@@ -1,6 +1,6 @@
 # **SecuriScan** 🚀🔍
 
-### **An Intelligent Website Security Vulnerability Scanner**
+### **SecuriScan is an , automated website security vulnerability scanner designed to identify and mitigate risks aligned with the OWASP Top 10**
 
 ![SecuriScan Banner](https://your-banner-image-url.com)
 
