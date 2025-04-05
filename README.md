@@ -5,7 +5,7 @@
 ![SecuriScan Banner](https://your-banner-image-url.com)
 
 ## **📌 Overview**
-SecuriScan is an **AI-powered** and **automated security vulnerability scanner** designed to identify and mitigate website security risks. It provides deep insights into website vulnerabilities such as **SQL Injection (SQLi), Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF)**, ensuring a robust cybersecurity posture for developers, businesses, and ethical hackers.
+SecuriScan is for anyone who has a website and wants to keep it safe from hackers—without needing to be a tech expert.,,, SecuriScan targets a broad audience within the web ecosystem, focusing on stakeholders who need robust, automated security testing without deep technical overhead.
 
 SecuriScan enables:
 - **Automated website crawling** to discover security loopholes.
