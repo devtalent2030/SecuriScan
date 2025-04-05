@@ -2,7 +2,7 @@
 
 ### **SecuriScan is an , automated website security vulnerability scanner designed to identify and mitigate risks aligned with the OWASP Top 10**
 
-![SecuriScan Banner](https://your-banner-image-url.com)
+![SecuriScan Banner](/securiscan-frontend/public/images/securiscan1.png)
 
 ## **📌 Overview**
 SecuriScan is for anyone who has a website and wants to keep it safe from hackers—without needing to be a tech expert.,,, SecuriScan targets a broad audience within the web ecosystem, focusing on stakeholders who need robust, automated security testing without deep technical overhead.
@@ -123,6 +123,27 @@ docker-compose up --build
 
 
 ---
+## 📸 Screenshots
+
+Below are a few sample screenshots from the application. Make sure the image files are placed in your repo (e.g., in `public/images/`) and update the paths accordingly.
+
+### 🏠 Homepage
+![SecuriScan Homepage](/securiscan-frontend/public/images/home.png)
+
+### 💉 SQL Injection Scan
+![SQL Injection Scanner](/securiscan-frontend/public/images/SQLInjection.png)
+
+### 🔁 CSRF Scanner
+![CSRF Scanner](/securiscan-frontend/public/images/CSRFScanner.png)
+
+### 🌐 SSRF Scanner
+![SSRF Scanner](/securiscan-frontend/public/images/SSRFScanner.png)
+
+### 🔐 Authentication Failures
+![Authentication Failures](/securiscan-frontend/public/images/AuthenticationFailures.png)
+
+### ⚙️ Security Misconfiguration
+![Security Misconfiguration](/securiscan-frontend/public/images/SecurityMisconfiguration.png)
 
 
 
